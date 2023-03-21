@@ -8,6 +8,12 @@ const config = {
         brand1: "#ffffff"
       },
     },
+    fontFamily: {
+      sans: [
+        "Inter var, sans-serif",
+        { fontFeatureSettings: '"cv11", "ss01"' },
+      ],
+    },
   },
   plugins: [],
 };
