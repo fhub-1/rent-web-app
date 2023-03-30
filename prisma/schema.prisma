@@ -13,41 +13,72 @@ model Example {
     updatedAt DateTime @updatedAt
 }
 
-// Necessary for Next auth
-model Account {
-    id                String  @id @default(cuid()) @map("_id")
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? // @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+// // Necessary for Next auth
+// model Account {
+//     userId            String
+//     type              String
+//     provider          String
+//     providerAccountId String
+//     refresh_token     String? // @db.Text
+//     access_token      String? // @db.Text
+//     expires_at        Int?
+//     token_type        String?
+//     scope             String?
+//     id_token          String? // @db.Text
+//     session_state     String?
+//     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
-}
+//     @@unique([provider, providerAccountId])
+// }
 
-model Session {
-    id           String   @id @default(cuid()) @map("_id")
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+// model Session {
+//     id           String   @id @default(cuid()) @map("_id")
+//     sessionToken String   @unique
+//     userId       String
+//     expires      DateTime
+//     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+// }
 
+// User table for storing user details
 model User {
-    id            String    @id @default(cuid()) @map("_id")
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
+    id                  Int        @id @default(autoincrement())
+    name                String
+    email               String     @unique
+    password            String
+    role                String     @default("user")
+    profile             Profile?
+    // renter relation
+    rentedProperties    Property[] @relation("renter")
+    // buyer relation
+    purchasedProperties Property[] @relation("buyer")
+    // seller relation
+    soldProperties      Property[] @relation("seller")
+}
+
+model Profile {
+    id     Int     @id @default(autoincrement())
+    bio    String?
+    phone  String?
+    user   User    @relation(fields: [userId], references: [id])
+    userId Int     @unique
+}
+
+model Property {
+    id          Int    @id @default(autoincrement())
+    name        String
+    price       Float
+    location    String
+    description String
+    //renting relation
+    renter      User?  @relation("renter", fields: [renterId], references: [id])
+    renterId    Int?
+
+    //buy relation
+    buyer    User? @relation("buyer", fields: [buyerId], references: [id])
+    buyerId  Int?
+    //selling realtion
+    seller   User  @relation("seller", fields: [sellerId], references: [id])
+    sellerId Int
 }
 
 model VerificationToken {
@@ -56,17 +87,4 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
-}
-
-model HouseTransaction {
-    id      Int      @id @default(autoincrement())
-    date    DateTime
-    buyer   String
-    seller  String
-    address String
-    city    String
-    state   String
-    zipCode String
-    price   Float
-    isBuy   Boolean
 }
